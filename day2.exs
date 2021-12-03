@@ -46,8 +46,11 @@ _ = :forward
 _ = :down
 _ = :up
 
-body = File.read!("inputs/day2.txt")
-commands = Enum.map(String.split(String.trim_trailing(body), "\n"), fn x -> Day2.parse_command(x) end)
+commands =
+  File.read!("inputs/day2.txt")
+  |> String.trim_trailing()
+  |> String.split("\n")
+  |> Enum.map(fn x -> Day2.parse_command(x) end)
 
 Day2.part1 commands
 Day2.part2 commands
