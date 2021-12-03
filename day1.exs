@@ -35,8 +35,11 @@ defmodule Day1 do
   end
 end
 
-body = File.read!("inputs/day1.txt")
-values = Enum.map(String.split(String.trim_trailing(body), "\n"), fn x -> String.to_integer(x) end)
+values =
+  File.read!("inputs/day1.txt")
+  |> String.trim_trailing()
+  |> String.split("\n")
+  |> Enum.map(fn x -> String.to_integer(x) end)
 
 Day1.part1 values
 Day1.part2 values
