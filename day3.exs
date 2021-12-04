@@ -1,13 +1,4 @@
 defmodule Day3 do
-  def to_int_tuples(number) do
-    List.to_tuple(
-      Enum.map(
-        String.split(number, "", trim: true),
-        fn x -> String.to_integer(x) end
-      )
-    )
-  end
-
   def part1(lines) do
     num_lines = length(lines)
 
