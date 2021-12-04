@@ -1,17 +1,13 @@
 defmodule Day1 do
-  def part1([head | tail]) do
-    part1_rec(tail, head, 0)
-  end
-
-  defp part1_rec([head | tail], previous, acc) do
-    if head > previous do
-      part1_rec(tail, head, acc + 1)
+  def part1([first, second | tail], acc) do
+    if second > first do
+      part1([second | tail], acc + 1)
     else
-      part1_rec(tail, head, acc)
+      part1([second | tail], acc)
     end
   end
 
-  defp part1_rec([], _, acc) do
+  def part1([_last | []], acc) do
     IO.puts(acc)
   end
 
@@ -41,5 +37,5 @@ values =
   |> String.split("\n")
   |> Enum.map(fn x -> String.to_integer(x) end)
 
-Day1.part1 values
+Day1.part1(values, 0)
 Day1.part2 values
