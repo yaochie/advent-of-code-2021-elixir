@@ -3,7 +3,7 @@ defmodule Day4 do
     values =
       board_string
       |> String.split()
-      |> Enum.map(fn x -> String.to_integer(x) end)
+      |> Enum.map(&String.to_integer/1)
 
     board =
       values
@@ -28,7 +28,7 @@ defmodule Day4 do
       {:not_done, new_status} ->
         part1_rec(rest, new_status)
       {:done, score} ->
-        IO.puts(score)
+        IO.puts(~s(Part 1 score: #{score}))
     end
   end
 
@@ -115,7 +115,7 @@ defmodule Day4 do
             new_scores = Map.put_new(current_scores, idx, board_score)
             new_acc = {[{idx, new_board} | boards], new_scores}
             if map_size(new_scores) == num_boards do
-              IO.puts(~s(score: #{board_score}))
+              IO.puts(~s(Part 2 score: #{board_score}))
               {:halt, new_acc}
             else
               {:cont, new_acc}
@@ -143,14 +143,12 @@ parts =
 numbers =
   hd(parts)
   |> String.split(",")
-  |> Enum.map(fn x -> String.to_integer(x) end)
-
-IO.puts(length(numbers))
+  |> Enum.map(&String.to_integer/1)
 
 boards =
   parts
   |> tl()
-  |> Enum.map(fn board -> Day4.parse_board(board) end)
+  |> Enum.map(&Day4.parse_board/1)
 
 Day4.part1(numbers, boards)
 Day4.part2(numbers, boards)

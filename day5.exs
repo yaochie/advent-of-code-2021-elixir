@@ -3,7 +3,7 @@ defmodule Day5 do
     [end1, end2] =
       string
       |> String.split(" -> ")
-      |> Enum.map(fn x -> parse_coords(x) end)
+      |> Enum.map(&parse_coords/1)
 
     {end1, end2}
   end
@@ -12,14 +12,14 @@ defmodule Day5 do
     [x, y] =
       string
       |> String.split(",")
-      |> Enum.map(fn x -> String.to_integer(x) end)
+      |> Enum.map(&String.to_integer/1)
 
     {x, y}
   end
 
   def part1(lines) do
     # keep only horizontal or vertical
-    lines = Enum.reject(lines, fn line -> is_diagonal?(line) end)
+    lines = Enum.reject(lines, &is_diagonal?/1)
 
     update_fn =
       fn line, board ->
@@ -39,7 +39,7 @@ defmodule Day5 do
     count =
       board
       |> Map.values()
-      |> Enum.count(fn count -> count >= 2 end)
+      |> Enum.count(&(&1 >= 2))
 
     IO.puts(count)
   end
@@ -93,7 +93,7 @@ defmodule Day5 do
     count =
       board
       |> Map.values()
-      |> Enum.count(fn count -> count >= 2 end)
+      |> Enum.count(&(&1 >= 2))
 
     IO.puts(count)
   end
@@ -112,7 +112,7 @@ lines =
   File.read!("inputs/day5.txt")
   |> String.trim_trailing()
   |> String.split("\n")
-  |> Enum.map(fn line -> Day5.parse_line(line) end)
+  |> Enum.map(&Day5.parse_line/1)
 
 Day5.part1(lines)
 Day5.part2(lines)
