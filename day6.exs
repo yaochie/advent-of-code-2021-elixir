@@ -10,7 +10,7 @@ defmodule Day6 do
   end
 
   defp simulate(0, counts) do
-    # print total number of lanternfish
+    # update total number of lanternfish
     counts
     |> Map.values()
     |> Enum.sum()
@@ -35,8 +35,7 @@ numbers =
   File.read!("inputs/day6.txt")
   |> String.trim_trailing()
   |> String.split(",")
-  |> Enum.map(fn x -> String.to_integer(x) end)
-
+  |> Enum.map(&String.to_integer/1)
 
 counts = Enum.reduce(
   numbers,
