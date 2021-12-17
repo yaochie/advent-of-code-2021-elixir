@@ -1,7 +1,13 @@
+# :type is either :literal or :operator
+# :value is the literaL value or the sub-packets
+defmodule Packet do
+  @enforce_keys [:type, :version, :bit_length, :value]
+  defstruct [:type, :version, :bit_length, :value]
+end
+
 defmodule Day16 do
-  # returns two possible values:
-  # - {{:literal, version, bit_length, value}, rest}
-  # - {{:operator, version, bit_length, sub_packets}, rest}
+  # returns {packet, rest}
+  # where the packet is the next Packet
   def parse_packet(data) do
     # parse header
     << version::3, type_id::3, rest::bitstring >> = data
@@ -11,12 +17,10 @@ defmodule Day16 do
 
     if type_id == 4 do
       {literal, bit_length, rest} = parse_literal(rest)
-      # IO.puts(~s(parsed literal: #{literal}, bit_length: #{bit_length}))
-      {{:literal, version, bit_length, literal}, rest}
+      {%Packet{type: :literal, version: version, bit_length: bit_length, value: literal}, rest}
     else
       {sub_packets, bit_length, rest} = parse_operator(rest)
-      # {{:operator, version, bit_length, sub_packets}, rest}
-      {{:operator, version, bit_length + 6, sub_packets}, rest}
+      {%Packet{type: :operator, version: version, bit_length: bit_length + 6, value: sub_packets}, rest}
     end
   end
 
@@ -67,27 +71,23 @@ defmodule Day16 do
   defp do_parse_type0_operator(data, sub_packets, 0) do
     packet_bits =
       sub_packets
-      |> Enum.map(fn {_, _, packet_bits, _} -> packet_bits end)
+      |> Enum.map(fn %Packet{bit_length: bit_length} -> bit_length end)
       |> Enum.sum()
 
     {Enum.reverse(sub_packets), packet_bits + 16, data}
   end
 
   defp do_parse_type0_operator(data, sub_packets, bit_length) do
-    # IO.inspect(data)
     {packet, rest} = parse_packet(data)
-    # IO.inspect(packet)
-    {_, _, packet_bits, _} = packet
-    # IO.puts(~s(packet bits: #{packet_bits}))
+    %Packet{bit_length: packet_bits} = packet
     remaining_bit_length = bit_length - packet_bits
-    # IO.puts(~s(remaining bits: #{remaining_bit_length}))
     do_parse_type0_operator(rest, [packet | sub_packets], remaining_bit_length)
   end
 
   defp do_parse_type1_operator(data, sub_packets, 0) do
     packet_bits =
       sub_packets
-      |> Enum.map(fn {_, _, packet_bits, _} -> packet_bits end)
+      |> Enum.map(fn %Packet{bit_length: bit_length} -> bit_length end)
       |> Enum.sum()
 
     {Enum.reverse(sub_packets), packet_bits + 12, data}
@@ -106,11 +106,11 @@ defmodule Day16 do
     version_sum
   end
 
-  defp do_part1([{:literal, version, _bit_length, _value} | packets], version_sum) do
+  defp do_part1([%Packet{type: :literal, version: version} | packets], version_sum) do
     do_part1(packets, version_sum + version)
   end
 
-  defp do_part1([{:operator, version, _bit_length, sub_packets} | packets], version_sum) do
+  defp do_part1([%Packet{type: :operator, version: version, value: sub_packets} | packets], version_sum) do
     sub_packet_sum = do_part1(sub_packets, 0)
     do_part1(packets, version_sum + version + sub_packet_sum)
   end
