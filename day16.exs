@@ -10,9 +10,6 @@ defmodule Day16 do
     # parse header
     << version::3, type_id::3, rest::bitstring >> = data
 
-    # IO.puts(~s(version: #{version}))
-    # IO.puts(~s(type ID: #{type_id}))
-
     if type_id == 4 do
       # literal
       {literal, bit_length, rest} = parse_literal(rest)
@@ -43,12 +40,10 @@ defmodule Day16 do
   end
 
   def parse_operator(<< 0::1, bit_length::15, rest::bitstring >>) do
-    # IO.puts(~s(parsing type 0 operator with bit length #{bit_length}))
     do_parse_type0_operator(rest, [], bit_length)
   end
 
   def parse_operator(<< 1::1, num_sub_packets::11, rest::bitstring >>) do
-    # IO.puts(~s(parsing type 1 operator with #{num_sub_packets} sub-packets))
     do_parse_type1_operator(rest, [], num_sub_packets)
   end
 
@@ -95,19 +90,77 @@ defmodule Day16 do
 
     sub_packet_sum + version
   end
-end
 
-_ = :literal
-_ = :operator
+  def part2(%Packet{type: 4, value: literal}) do
+    literal
+  end
+
+  # sum
+  def part2(%Packet{type: 0, value: sub_packets}) do
+    sub_packets
+    |> Enum.map(&part2/1)
+    |> Enum.sum()
+  end
+
+  # product
+  def part2(%Packet{type: 1, value: sub_packets}) do
+    sub_packets
+    |> Enum.map(&part2/1)
+    |> Enum.product()
+  end
+
+  # minimum
+  def part2(%Packet{type: 2, value: sub_packets}) do
+    sub_packets
+    |> Enum.map(&part2/1)
+    |> Enum.min()
+  end
+
+  # maximum
+  def part2(%Packet{type: 3, value: sub_packets}) do
+    sub_packets
+    |> Enum.map(&part2/1)
+    |> Enum.max()
+  end
+
+  # greater than
+  def part2(%Packet{type: 5, value: sub_packets}) do
+    [a, b] = Enum.map(sub_packets, &part2/1)
+    if a > b do
+      1
+    else
+      0
+    end
+  end
+
+  # less than
+  def part2(%Packet{type: 6, value: sub_packets}) do
+    [a, b] = Enum.map(sub_packets, &part2/1)
+    if a < b do
+      1
+    else
+      0
+    end
+  end
+
+  # equal to
+  def part2(%Packet{type: 7, value: sub_packets}) do
+    [a, b] = Enum.map(sub_packets, &part2/1)
+    if a == b do
+      1
+    else
+      0
+    end
+  end
+end
 
 data =
   File.read!("inputs/day16.txt")
   |> String.trim_trailing()
   |> Base.decode16!()
 
-IO.inspect(data)
-
 {packet, _padding} = Day16.parse_packet(data)
 
 # part 1: sum of version numbers
 IO.puts(~s(Part 1 answer: #{Day16.part1(packet)}))
+IO.puts(~s(Part 2 answer: #{Day16.part2(packet)}))
