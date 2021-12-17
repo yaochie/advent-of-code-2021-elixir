@@ -7,7 +7,6 @@ end
 
 defmodule Day16 do
   # returns {packet, rest}
-  # where the packet is the next Packet
   def parse_packet(data) do
     # parse header
     << version::3, type_id::3, rest::bitstring >> = data
@@ -24,27 +23,11 @@ defmodule Day16 do
     end
   end
 
-  # parses data into a list of packets
-  def parse_data(data) do
-    do_parse_data(data, [])
-  end
-
-  defp do_parse_data(data, packets) when bit_size(data) < 8 do
-    Enum.reverse(packets)
-  end
-
-  defp do_parse_data(data, packets) do
-    {packet, rest} = parse_packet(data)
-    do_parse_data(rest, [packet | packets])
-  end
-
   def parse_literal(data) do
     do_parse_literal(data, "", 6)
   end
 
   defp do_parse_literal(<< flag::1, value::4, rest::bitstring >>, acc, bit_length) do
-    # IO.puts(~s(flag: #{flag}))
-
     new_value = << acc::bitstring, value::4 >>
     new_bit_length = bit_length + 5
 
@@ -98,21 +81,17 @@ defmodule Day16 do
     do_parse_type1_operator(rest, [packet | sub_packets], num_sub_packets - 1)
   end
 
-  def part1(packets) do
-    do_part1(packets, 0)
+  def part1(%Packet{type: :literal, version: version}) do
+    version
   end
 
-  defp do_part1([], version_sum) do
-    version_sum
-  end
+  def part1(%Packet{type: :operator, version: version, value: sub_packets}) do
+    sub_packet_sum =
+      sub_packets
+      |> Enum.map(&part1/1)
+      |> Enum.sum()
 
-  defp do_part1([%Packet{type: :literal, version: version} | packets], version_sum) do
-    do_part1(packets, version_sum + version)
-  end
-
-  defp do_part1([%Packet{type: :operator, version: version, value: sub_packets} | packets], version_sum) do
-    sub_packet_sum = do_part1(sub_packets, 0)
-    do_part1(packets, version_sum + version + sub_packet_sum)
+    sub_packet_sum + version
   end
 end
 
@@ -126,7 +105,7 @@ data =
 
 IO.inspect(data)
 
-packets = Day16.parse_data(data)
+{packet, _padding} = Day16.parse_packet(data)
 
 # part 1: sum of version numbers
-IO.puts(~s(Part 1 answer: #{Day16.part1(packets)}))
+IO.puts(~s(Part 1 answer: #{Day16.part1(packet)}))
