@@ -1,4 +1,3 @@
-# :type is either :literal or :operator
 # :value is the literaL value or the sub-packets
 defmodule Packet do
   @enforce_keys [:type, :version, :bit_length, :value]
@@ -15,11 +14,13 @@ defmodule Day16 do
     # IO.puts(~s(type ID: #{type_id}))
 
     if type_id == 4 do
+      # literal
       {literal, bit_length, rest} = parse_literal(rest)
-      {%Packet{type: :literal, version: version, bit_length: bit_length, value: literal}, rest}
+      {%Packet{type: type_id, version: version, bit_length: bit_length, value: literal}, rest}
     else
+      # operator
       {sub_packets, bit_length, rest} = parse_operator(rest)
-      {%Packet{type: :operator, version: version, bit_length: bit_length + 6, value: sub_packets}, rest}
+      {%Packet{type: type_id, version: version, bit_length: bit_length + 6, value: sub_packets}, rest}
     end
   end
 
@@ -81,11 +82,12 @@ defmodule Day16 do
     do_parse_type1_operator(rest, [packet | sub_packets], num_sub_packets - 1)
   end
 
-  def part1(%Packet{type: :literal, version: version}) do
+  # literal
+  def part1(%Packet{type: 4, version: version}) do
     version
   end
 
-  def part1(%Packet{type: :operator, version: version, value: sub_packets}) do
+  def part1(%Packet{version: version, value: sub_packets}) do
     sub_packet_sum =
       sub_packets
       |> Enum.map(&part1/1)
